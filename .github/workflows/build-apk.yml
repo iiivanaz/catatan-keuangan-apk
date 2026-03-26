@@ -1,0 +1,38 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Bubblewrap
+      run: npm install -g @bubblewrap/cli
+    
+    - name: Init Bubblewrap project
+      run: |
+        mkdir -p android-app
+        cd android-app
+        echo -e "finance-weld-rho.vercel.app\n/\nCatatan Keuangan - Finance Tracker\nPembukuan\napp.vercel.finance_weld_rho.twa\n1\nstandalone\ndefault\n#8B5A2B\n#8B5A2B\nhttps://finance-weld-rho.vercel.app/icon-512.png\nhttps://finance-weld-rho.vercel.app/icon-512.png\n\n\nN\nN\nandroid.keystore\npembukuan" | bubblewrap init --manifest https://finance-weld-rho.vercel.app/manifest.json
+    
+    - name: Build APK
+      run: |
+        cd android-app
+        bubblewrap build
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release
+        path: android-app/app-release-signed.apk
